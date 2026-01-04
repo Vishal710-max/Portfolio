@@ -39,7 +39,7 @@ Follow these steps to run the project on your local machine:
 
 ### 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/Shreyash-SP80/my-portfolio.git
+git clone https://github.com/Vishal710-max/my-portfolio.git
 cd my-portfolio
 ```
 
