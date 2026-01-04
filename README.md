@@ -40,7 +40,7 @@ Follow these steps to run the project on your local machine:
 ### 1️⃣ Clone the repository
 ```bash
 git clone https://github.com/Vishal710-max/portfolio.git
-cd my-portfolio
+cd portfolio
 ```
 
 ### 2️⃣ Install dependencies
