@@ -91,7 +91,6 @@ portfolio/
 │  ├─ main.jsx          # Entry point
 ├─ .env                 # Environment variables
 ├─ package.json
-├─ tailwind.config.js
 ├─ vite.config.js
 └─ README.md
 ```
