@@ -78,7 +78,7 @@ npm run preview
 
 ## 📂 Directory Structure
 ```bash
-my-portfolio/
+portfolio/
 ├─ public/              # Static assets (images, videos, etc.)
 ├─ src/
 │  ├─ assets/           # Images, icons, videos
