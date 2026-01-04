@@ -83,6 +83,7 @@ portfolio/
 ├─ src/
 │  ├─ assets/           # Images, icons, videos
 │  ├─ components/       # Reusable React components pages like Home, About, Projects
+|  ├─ hooks 
 │  ├─ App.jsx           # Main React app
 │  ├─ main.jsx          # Entry point
 ├─ .env                 # Environment variables
