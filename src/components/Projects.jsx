@@ -17,6 +17,7 @@ const projects = [
     description:
       "A modern, interactive portfolio showcasing projects, skills, and experience Built with React and Tailwind, featuring smooth animations and responsive design.",
     tech: ["React", "GSAP", "Tailwind"],
+    live: "https://portfolio-sect.vercel.app/",
     github: "https://github.com/Vishal710-max/Portfolio",
     image: "/Projects_images/portfolio.png",
   },
@@ -289,5 +290,6 @@ const Projects = () => {
     </section>
   );
 };
+
 
 export default Projects;
