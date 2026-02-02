@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import emailjs from "@emailjs/browser";
 import { Mail, Phone, MapPin, Send, Github, Linkedin, Instagram,Sparkles } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 const Contact = () => {
@@ -61,21 +62,31 @@ const Contact = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     if (!formData.name || !formData.email || !formData.message) {
       alert("Please fill in all fields");
       setIsSubmitting(false);
       return;
     }
-
-    setTimeout(() => {
+    try {
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        message: formData.message,
+      };
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
       alert("Message sent successfully!");
       setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      alert("Failed to send message. Please try again later.");
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   const handleCopy = (text, id) => {
