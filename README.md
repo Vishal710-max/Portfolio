@@ -1,6 +1,6 @@
 #  My Portfolio - Vishal Bhingarde
 
-[![GitHub stars](https://img.shields.io/github/stars/Vishal710-max/Portfolio?style=social)](https://github.com/Vishal710-max/Portfolio) [![GitHub forks](https://img.shields.io/github/forks/Vishal710-max/Portfolio?style=social)](https://github.com/Vishal710-max/Portfolio) [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000?style=flat&logo=vercel)](https://my-portfolio.vercel.app/)
+[![GitHub stars](https://img.shields.io/github/stars/Vishal710-max/Portfolio?style=social)](https://github.com/Vishal710-max/Portfolio) [![GitHub forks](https://img.shields.io/github/forks/Vishal710-max/Portfolio?style=social)](https://github.com/Vishal710-max/Portfolio) [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000?style=flat&logo=vercel)](https://portfolio-sect.vercel.app/)
 
 Welcome to my **personal portfolio website**, built using **React** and **Vite**, styled with **Tailwind CSS**, and enhanced with smooth animations using **Framer Motion** and **GSAP**.  
 This portfolio highlights my **projects, skills, and contact methods** to connect with me.
