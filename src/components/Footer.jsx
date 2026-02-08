@@ -20,13 +20,23 @@ const Footer = () => {
   const [visible, setVisible] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isInFooter, setIsInFooter] = useState(false);
   const footerRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
           setVisible(true);
+          setIsInFooter(true);
+        } else {
+          setIsInFooter(false);
+          // Reset to original position when leaving footer
+          setButtonPosition({ x: 0, y: 0 });
         }
       },
       { threshold: 0.1 }
@@ -37,7 +47,13 @@ const Footer = () => {
     }
 
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 500);
+      const shouldShow = window.scrollY > 500;
+      setShowScrollTop(shouldShow);
+      
+      // Reset position when scrolling up
+      if (!shouldShow) {
+        setButtonPosition({ x: 0, y: 0 });
+      }
     };
 
     const handleMouseMove = (e) => {
@@ -48,56 +64,81 @@ const Footer = () => {
           y: e.clientY - rect.top,
         });
       }
+
+      // Handle dragging
+      if (isDragging && footerRef.current && buttonRef.current) {
+        const footerRect = footerRef.current.getBoundingClientRect();
+        const buttonRect = buttonRef.current.getBoundingClientRect();
+        
+        let newX = e.clientX - dragOffset.x;
+        let newY = e.clientY - dragOffset.y;
+        
+        // Constrain within footer bounds
+        const minX = footerRect.left;
+        const maxX = footerRect.right - buttonRect.width;
+        const minY = footerRect.top;
+        const maxY = footerRect.bottom - buttonRect.height;
+        
+        newX = Math.max(minX, Math.min(maxX, newX));
+        newY = Math.max(minY, Math.min(maxY, newY));
+        
+        setButtonPosition({
+          x: newX - footerRect.left,
+          y: newY - footerRect.top,
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
     };
 
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
     
     return () => {
       if (observer) observer.disconnect();
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, []);
+  }, [isDragging, dragOffset]);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (!isDragging) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+      setIsDragging(true);
+    }
   };
 
   const socialLinks = [
     {
-      icon: () => (
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden="true">
-          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.26.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.085 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.606-2.665-.304-5.466-1.332-5.466-5.931 0-1.31.468-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.3 1.23a11.5 11.5 0 0 1 3.003-.404c1.02.005 2.047.138 3.003.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.119 3.176.77.84 1.235 1.911 1.235 3.221 0 4.61-2.803 5.625-5.475 5.921.43.372.823 1.102.823 2.222v3.293c0 .32.218.694.825.576C20.565 21.796 24 17.297 24 12c0-6.63-5.37-12-12-12z"/>
-        </svg>
-      ),
+      icon: Github,
       href: "https://github.com/Vishal710-max",
       label: "GitHub",
       gradient: "from-purple-500 via-pink-500 to-purple-600",
       hoverColor: "group-hover:text-purple-400"
     },
     {
-      icon: () => (
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden="true">
-          <path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11.75 20h-2.5v-8.5h2.5v8.5zm-1.25-9.75c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm15.25 9.75h-2.5v-4.25c0-1.01-.02-2.31-1.41-2.31-1.41 0-1.63 1.1-1.63 2.23v4.33h-2.5v-8.5h2.4v1.16h.03c.33-.63 1.14-1.3 2.35-1.3 2.51 0 2.97 1.65 2.97 3.8v4.84z"/>
-        </svg>
-      ),
+      icon: Linkedin,
       href: "https://www.linkedin.com/in/vishal-bhingarde-bb23a2376",
       label: "LinkedIn",
       gradient: "from-blue-400 via-cyan-400 to-blue-500",
       hoverColor: "group-hover:text-blue-400"
     },
     {
-      icon: () => (
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden="true">
-          <radialGradient id="IGpaint0_radial" cx="1.464" cy="0.464" r="1.5" gradientTransform="matrix(16 0 0 16 2 2)" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#fd5"/>
-            <stop offset=".5" stopColor="#ff543e"/>
-            <stop offset="1" stopColor="#c837ab"/>
-          </radialGradient>
-          <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5zm4.25 2.75a5.75 5.75 0 1 1 0 11.5 5.75 5.75 0 0 1 0-11.5zm0 1.5a4.25 4.25 0 1 0 0 8.5 4.25 4.25 0 0 0 0-8.5zm5.25 1.25a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0z" fill="url(#IGpaint0_radial)"/>
-        </svg>
-      ),
+      icon: Instagram,
       href: "https://www.instagram.com/vishal.bhingarde?igsh=MTJjcHR6ajI3dTNsYQ==",
       label: "Instagram",
       gradient: "from-pink-500 via-rose-500 to-orange-500",
@@ -355,58 +396,36 @@ const Footer = () => {
 
             {/* Social Links - Stacked Design */}
             <div className="space-y-3">
-              {socialLinks.map((social, i) => (
-                <a
-                  key={i}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-4 p-3 rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-xl backdrop-blur-sm"
-                  style={{
-                    background: 'rgba(15, 23, 42, 0.5)',
-                    borderColor: 'rgba(59, 130, 246, 0.2)'
-                  }}
-                >
-                  <div className={`relative p-2.5 rounded-lg bg-gradient-to-br ${social.gradient} bg-opacity-10`}>
-                    <div className={`absolute inset-0 bg-gradient-to-br ${social.gradient} opacity-0 group-hover:opacity-20 rounded-lg blur-md transition-opacity duration-300`} />
-                    {typeof social.icon === 'function' ? (
-                      <span className={`text-slate-400 ${social.hoverColor} transition-colors duration-300 relative z-10`}>{social.icon()}</span>
-                    ) : (
-                      <social.icon className={`w-5 h-5 text-slate-400 ${social.hoverColor} transition-colors duration-300 relative z-10`} />
-                    )}
-                  </div>
-                  <span className="text-sm font-medium text-slate-400 group-hover:text-white transition-colors duration-300">
-                    {social.label}
-                  </span>
-                </a>
-              ))}
+              {socialLinks.map((social, i) => {
+                const SocialIcon = social.icon;
+                return (
+                  <a
+                    key={i}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-4 p-3 rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-xl backdrop-blur-sm"
+                    style={{
+                      background: 'rgba(15, 23, 42, 0.5)',
+                      borderColor: 'rgba(59, 130, 246, 0.2)'
+                    }}
+                  >
+                    <div className={`relative p-2.5 rounded-lg bg-gradient-to-br ${social.gradient} bg-opacity-5`}>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${social.gradient} opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-300`} />
+                      <SocialIcon className={`w-5 h-5 text-slate-400 ${social.hoverColor} transition-colors duration-300 relative z-10`} />
+                    </div>
+                    <span className="text-sm font-medium text-slate-400 group-hover:text-white transition-colors duration-300">
+                      {social.label}
+                    </span>
+                  </a>
+                );
+              })}
             </div>
-
-            {/* CTA Button */}
-            <button 
-              className="group w-full relative overflow-hidden px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 hover:shadow-2xl hover:scale-105"
-              style={{
-                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)'
-              }}
-            >
-              <div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{
-                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                }}
-              />
-              <span className="relative flex items-center justify-center gap-2">
-                <Coffee className="w-4 h-4" />
-                Hire Me
-                <Zap className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-              </span>
-            </button>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="relative my-8">
+        <div className="relative my-12">
           <div className="absolute inset-0 flex items-center">
             <div 
               className="w-full h-px"
@@ -418,14 +437,14 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 transition-all duration-700 delay-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 transition-all duration-700 delay-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm text-slate-500">
             <span>© {new Date().getFullYear()}</span>
-            <span className="text-blue-900/50">•</span>
+            <span className="text-blue-900/50 mx-1">•</span>
             <span className="font-semibold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
               Vishal Bhingarde
             </span>
-            <span className="text-blue-900/50">•</span>
+            <span className="text-blue-900/50 mx-1">•</span>
             <span>All Rights Reserved</span>
           </div>
 
@@ -440,8 +459,46 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Scroll to Top Button */}
-      {showScrollTop && (
+      {/* Draggable Scroll to Top Button - Only visible when in footer */}
+      {showScrollTop && isInFooter && (
+        <button
+          ref={buttonRef}
+          onMouseDown={handleMouseDown}
+          onClick={scrollToTop}
+          className={`absolute z-50 group ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          style={{
+            left: buttonPosition.x === 0 ? 'auto' : `${buttonPosition.x}px`,
+            top: buttonPosition.x === 0 ? 'auto' : `${buttonPosition.y}px`,
+            right: buttonPosition.x === 0 ? '2rem' : 'auto',
+            bottom: buttonPosition.x === 0 ? '2rem' : 'auto',
+            transition: isDragging ? 'none' : 'all 0.3s ease',
+          }}
+          aria-label="Scroll to top"
+        >
+          <div className="relative">
+            {/* Glow effect */}
+            <div 
+              className={`absolute inset-0 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300 ${isDragging ? 'opacity-75 blur-2xl' : ''}`}
+              style={{
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+              }}
+            />
+            
+            {/* Button */}
+            <div 
+              className={`relative p-3 sm:p-4 rounded-xl shadow-xl transition-all duration-300 ${isDragging ? 'scale-110' : 'group-hover:scale-110'}`}
+              style={{
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+              }}
+            >
+              <ArrowUp className={`w-5 h-5 text-white transition-transform duration-300 ${isDragging ? '' : 'group-hover:-translate-y-1'}`} />
+            </div>
+          </div>
+        </button>
+      )}
+
+      {/* Fixed Scroll to Top Button - Only visible when outside footer */}
+      {showScrollTop && !isInFooter && (
         <button
           onClick={scrollToTop}
           className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50 group"
